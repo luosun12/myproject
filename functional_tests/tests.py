@@ -4,6 +4,8 @@ import time
 import unittest
 from selenium.webdriver.common.by import By
 from django.test import LiveServerTestCase
+from selenium.common.exceptions import WebDriverException
+MAX_WAIT = 10
 
 class NewVisitorTest(LiveServerTestCase):
 
@@ -22,7 +24,7 @@ class NewVisitorTest(LiveServerTestCase):
                 self.assertIn(row_text, [row.text for row in rows])
                 return
             except (AssertionError, WebDriverException) as e:
-                if time.time() - start_time > MAX_WAIT:
+                if time.time() - start_time > MAX_WAIT:                                 
                     raise e
                 time.sleep(0.5)
 
@@ -57,10 +59,40 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('1: Buy flowers')
         self.wait_for_row_in_list_table('2: Give a gift to Lisi')
 
-        self.fail('Finish the test!')
-        # 他访问的页面URL，发现他的待办事项列表还在
-        
         # 他感到很满意
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # 第一个用户新建一个待办事项列表
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox.send_keys('Buy flowers')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy flowers')
 
-    
+        # 他注意到网站为他生成了一个唯一的URL
+        zhangsan_list_url = self.browser.current_url
+        self.assertRegex(zhangsan_list_url, '/lists/.+')
 
+        #  现在一个新用户王五访问网站
+        self.browser.quit()
+        self.browser = webdriver.Chrome()
+        #  王五访问首页
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element(By.TAG_NAME, 'body').text
+        self.assertNotIn('Buy flowers', page_text)
+        self.assertNotIn('BGive a gift to Lisi', page_text)
+        #  王五新建一个待办事项
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+        #  王五获得了他的唯一URL
+        wangwu_list_url = self.browser.current_url
+        self.assertRegex(wangwu_list_url, '/lists/.+')
+        self.assertNotEqual(wangwu_list_url, zhangsan_list_url)
+        
+        #  这个页面还是没有张三的清单
+        page_text = self.browser.find_element(By.TAG_NAME, 'body').text
+        self.assertNotIn('Buy flowers', page_text)
+        self.assertIn('Buy milk', page_text)
+        
+        #  两人都很满意，然后去睡觉了
