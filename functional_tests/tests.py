@@ -49,7 +49,7 @@ class NewVisitorTest(LiveServerTestCase):
         # 他按了回车键后，页面更新了
         inputbox.send_keys('Buy flowers')
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Buy flowers')
+        self.wait_for_row_in_list_table('1:Buy flowers')
 
         # 页面中又显示了一个文本输入框，可以输入其他待办事项"
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
@@ -57,8 +57,8 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox.send_keys(Keys.ENTER)
         
         #页面再次更新，他的清单中显示了这两个待办事项
-        self.wait_for_row_in_list_table('1: Buy flowers')
-        self.wait_for_row_in_list_table('2: Give a gift to Lisi')
+        self.wait_for_row_in_list_table('1:Buy flowers')
+        self.wait_for_row_in_list_table('2:Give a gift to Lisi')
 
         # 他感到很满意
     def test_multiple_users_can_start_lists_at_different_urls(self):
@@ -67,7 +67,7 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
         inputbox.send_keys('Buy flowers')
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Buy flowers')
+        self.wait_for_row_in_list_table('1:Buy flowers')
 
         # 他注意到网站为他生成了一个唯一的URL
         zhangsan_list_url = self.browser.current_url
@@ -85,7 +85,7 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
         inputbox.send_keys('Buy milk')
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Buy milk')
+        self.wait_for_row_in_list_table('1:Buy milk')
         #  王五获得了他的唯一URL
         wangwu_list_url = self.browser.current_url
         self.assertRegex(wangwu_list_url, '/lists/.+')
@@ -99,6 +99,7 @@ class NewVisitorTest(LiveServerTestCase):
         #  两人都很满意，然后去睡觉了
     def test_layout_and_styling(self):
         # 张三访问首页
+        
         self.browser.get(self.live_server_url)
         self.browser.set_window_size(1024, 768)
         
@@ -113,7 +114,7 @@ class NewVisitorTest(LiveServerTestCase):
         # 他新建一个清单，看到输入框仍然完美居中显示
         inputbox.send_keys('testing')
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: testing')
+        self.wait_for_row_in_list_table('1:testing')
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
         self.assertAlmostEqual(
             inputbox.location['x'] + inputbox.size['width'] / 2,
